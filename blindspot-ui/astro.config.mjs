@@ -20,6 +20,10 @@ export default defineConfig({
     schema: {
       'BLINDSPOT_ENV': envField.string({context: "client", access: "public", optional: false}),
       'BLINDSPOT_VERSION': envField.string({context: "client", access: "public", optional: false, default: 'dev'}),
+      'BLINDSPOT_ENDPOINT': envField.string({
+        context: "client", access: "public",
+        optional: false, default: "http://localhost:7779/"
+      }),
     },
     validateSecrets: true
   },

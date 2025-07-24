@@ -4,6 +4,8 @@ ARG blindspot_env
 ENV BLINDSPOT_ENV=$blindspot_env
 ARG blindspot_version
 ENV BLINDSPOT_VERSION=$blindspot_version
+ARG blindspot_endpoint
+ARG BLINDSPOT_ENDPOINT=$blindspot_endpoint
 
 WORKDIR /app
 COPY package*.json ./

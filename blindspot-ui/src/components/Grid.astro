@@ -1,0 +1,12 @@
+---
+import LiveGrid from '../components/LiveGrid.vue';
+import {BlindspotAPI, BlindspotSingletonService} from "../services/BlindspotService";
+import {BLINDSPOT_ENDPOINT} from 'astro:env/client';
+
+BlindspotSingletonService.initService({
+  endpoint: BLINDSPOT_ENDPOINT
+})
+
+const grid = await BlindspotAPI.grid();
+---
+<LiveGrid client:load initialData={grid}/>

@@ -11,6 +11,7 @@ in
 {
   name = "blindspot";
   env.BLINDSPOT_ENV = "Development";
+  env.BLINDSPOT_ENDPOINT = "http://localhost:7779/";
 
   packages = [
     pkgs.yq-go

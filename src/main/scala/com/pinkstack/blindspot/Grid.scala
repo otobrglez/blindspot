@@ -13,6 +13,7 @@ import zio.RIO
 
 object Grid:
   final case class Row(
+    id: String,
     title: String,
     kind: Model.ItemKind,
     releaseYear: Int,
@@ -50,6 +51,7 @@ object Grid:
       val init =
         sql"""
              SELECT
+              i.id,
               i.title, i.kind, i.original_release_year, i.imdb_votes, i.imdb_score, i.tmdb_popularity,
               i.tmdb_score, i.tomato_meter, i.provider_tags,
               $rankFiled as rank

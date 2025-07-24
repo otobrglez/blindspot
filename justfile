@@ -17,6 +17,7 @@ docker-build-ui: refresh-version
     --platform linux/amd64 \
     --build-arg blindspot_env=Production \
     --build-arg blindspot_version={{service_version}} \
+    --build-arg blindspot_endpoint=https://blindspot-api.pinkstack.com/ \
     -t otobrglez/blindspot-ui \
     -t registry.ogrodje.si/otobrglez/blindspot-ui \
     -t registry.ogrodje.si/otobrglez/blindspot-ui:{{service_version}} \
