@@ -1,0 +1,5 @@
+ALTER TABLE items
+    ADD COLUMN tmdb_popularity DOUBLE PRECISION;
+
+ALTER TABLE items
+    ADD COLUMN tmdb_score DOUBLE PRECISION;

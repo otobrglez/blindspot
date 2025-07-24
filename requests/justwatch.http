@@ -1,0 +1,388 @@
+### Simple Query over HTTP
+// Poking around
+GRAPHQL https://apis.justwatch.com/graphql
+
+query GetProviders($country: Country!) {
+    packages(
+        country: $country
+        platform: WEB
+        includeAddons: true
+    ) {
+        technicalName
+        clearName
+        id
+        __typename
+        slug
+        icon
+    },
+
+    #/*
+    #pages(
+    #    country: $country
+    #) {
+    #    id
+    #}
+}
+{
+
+  "country": "GB"
+}
+
+### Simple Query over HTTP
+// Poking around
+GRAPHQL https://apis.justwatch.com/graphql
+
+query GetProviders($country: Country!) {
+    packages(
+        country: $country
+        platform: WEB
+        includeAddons: true
+    ) {
+        technicalName
+        clearName
+        id
+        __typename
+        slug
+        packageId
+        monetizationTypes
+        # hasTitles
+        # hasSport
+        # planOffers { isTrial }
+        iconWide
+    }
+}
+
+{
+  "country": "GB"
+}
+
+### Simple Query over HTTP
+// Poking around
+GRAPHQL https://apis.justwatch.com/graphql
+
+query GetMonetizationTypes($country: Country!) {
+    packages(
+        country: $country
+        platform: WEB
+        includeAddons: true
+    ) {
+        monetizationTypes
+        technicalName
+        clearName
+        id
+        __typename
+    }
+}
+
+{
+  "country": "GB"
+}
+
+
+### get countries
+GET https://www.justwatch.com/uk
+
+
+### x
+GET https://apis.justwatch.com/content/locales/state?platform=web
+
+### x
+GET https://apis.justwatch.com/content/locales/state
+
+###
+GET https://apis.justwatch.com/content/providers/locale/en_NL
+
+### Movies in countries?
+GRAPHQL https://apis.justwatch.com/graphql
+
+query GetPopularTitles(
+    $backdropProfile: BackdropProfile, $country: Country!, $first: Int! = 70,
+    $language: Language!, $format: ImageFormat, $after: String,
+    $popularTitlesFilter: TitleFilter,
+    $popularTitlesSortBy: PopularTitlesSorting! = POPULAR,
+    $profile: PosterProfile, $sortRandomSeed: Int! = 0, $offset: Int = 0, $creditsRole: CreditRole! = DIRECTOR) {
+    popularTitles(
+        country: $country
+        filter: $popularTitlesFilter
+        first: $first
+        sortBy: $popularTitlesSortBy
+        sortRandomSeed: $sortRandomSeed
+        offset: $offset
+        after: $after
+    ) {
+        __typename
+        edges {
+            cursor
+            node {
+                ...PopularTitleGraphql
+                __typename
+            }
+            __typename
+        }
+        pageInfo {
+            startCursor
+            endCursor
+            hasPreviousPage
+            hasNextPage
+            __typename
+        }
+        totalCount
+    }
+}
+
+fragment PopularTitleGraphql on MovieOrShow {
+    __typename
+    id
+    objectId
+    objectType
+    content(country: $country, language: $language) {
+        title
+        fullPath
+        originalReleaseYear
+        shortDescription
+        interactions {
+            likelistAdditions
+            dislikelistAdditions
+            __typename
+        }
+        scoring {
+            imdbVotes
+            imdbScore
+            tmdbPopularity
+            tmdbScore
+            tomatoMeter
+            certifiedFresh
+            jwRating
+            __typename
+        }
+        interactions {
+            votesNumber
+            __typename
+        }
+        dailymotionClips: clips(providers: [DAILYMOTION]) {
+            sourceUrl
+            externalId
+            provider
+            streamUrl
+            __typename
+        }
+        posterUrl(profile: $profile, format: $format)
+        ... on MovieOrShowOrSeasonContent {
+            backdrops(profile: $backdropProfile, format: $format) {
+                backdropUrl
+                __typename
+            }
+            __typename
+        }
+        isReleased
+        credits(role: $creditsRole) {
+            name
+            personId
+            __typename
+        }
+        runtime
+        genres {
+            translation(language: $language)
+            shortName
+            __typename
+        }
+        __typename
+    }
+    likelistEntry {
+        createdAt
+        __typename
+    }
+    dislikelistEntry {
+        createdAt
+        __typename
+    }
+    watchlistEntryV2 {
+        createdAt
+        __typename
+    }
+    customlistEntries {
+        createdAt
+        __typename
+    }
+    freeOffersCount: offerCount(
+        country: $country
+        platform: WEB
+        filter: {monetizationTypes: [FREE, ADS]}
+    )
+    ... on Movie {
+        seenlistEntry {
+            createdAt
+            __typename
+        }
+        __typename
+    }
+    ... on Show {
+        tvShowTrackingEntry {
+            createdAt
+            __typename
+        }
+        seenState(country: $country) {
+            seenEpisodeCount
+            progress
+            __typename
+        }
+        __typename
+    }
+}
+
+
+
+{
+  "first": 40,
+  "country": "SI",
+  "language": "en"
+}
+
+
+### Movies in countries?
+GRAPHQL https://apis.justwatch.com/graphql
+
+query GetPopularTitles($country: Country!, $language: Language!,
+    $popularTitlesFilter: TitleFilter,
+    # $profile: PosterProfile,
+    $popularTitlesSortBy: PopularTitlesSorting! = POPULAR,
+    # $creditsRole: CreditRole! = DIRECTOR,
+    # $format: ImageFormat,
+    $first: Int! = 70,
+    $offset: Int = 0,
+    $sortRandomSeed: Int! = 0) {
+    popularTitles(
+        country: $country
+        filter: $popularTitlesFilter
+        first: $first
+        sortBy: $popularTitlesSortBy
+        sortRandomSeed: $sortRandomSeed
+        offset: $offset
+        # after: $after
+    ) {
+        # __typename
+        edges {
+            cursor
+            node {
+                ...PopularTitleGraphql
+                # __typename
+            }
+            # __typename
+        }
+        pageInfo {
+            startCursor
+            endCursor
+            hasPreviousPage
+            hasNextPage
+            # __typename
+        }
+        totalCount
+    }
+}
+
+fragment PopularTitleGraphql on MovieOrShow {
+    # __typename
+    id
+    objectId
+    objectType
+    offers(country: $country, platform: WEB) {
+        monetizationType
+        availableToTime
+        availableFromTime
+        package {
+            id
+            clearName
+            technicalName
+            slug
+        }
+    }
+    content(country: $country, language: $language) {
+        title
+        # fullPath
+        originalReleaseYear
+        shortDescription
+        # interactions {
+        #     likelistAdditions
+        #     dislikelistAdditions
+        #     __typename
+        # }
+        scoring {
+            imdbVotes
+            imdbScore
+            tmdbPopularity
+            tmdbScore
+            tomatoMeter
+            certifiedFresh
+            jwRating
+            __typename
+        }
+        # interactions {
+        #     votesNumber
+        #     __typename
+        # }
+        # dailymotionClips: clips(providers: [DAILYMOTION]) {
+        #     sourceUrl
+        #     externalId
+        #     provider
+        #     streamUrl
+        #     # __typename
+        # }
+        # posterUrl(profile: $profile, format: $format)
+        # ... on MovieOrShowOrSeasonContent {
+        #     # backdrops(profile: $backdropProfile, format: $format) {
+        #     #     backdropUrl
+        #     #     __typename
+        #     # }
+        #     __typename
+        # }
+        # isReleased
+        # credits(role: $creditsRole) {
+        #     name
+        #     personId
+        #     # __typename
+        # }
+        # runtime
+        # genres {
+        #     translation(language: $language)
+        #     shortName
+        #     # __typename
+        # }
+        # __typename
+    }
+    # freeOffersCount: offerCount(
+    #     country: $country
+    #     platform: WEB
+    #     filter: {monetizationTypes: [FREE, ADS]}
+    # )
+    ... on Movie {
+        seenlistEntry {
+            createdAt
+            # __typename
+        }
+        # __typename
+    }
+    ... on Show {
+        tvShowTrackingEntry {
+            createdAt
+            # __typename
+        }
+        seenState(country: $country) {
+            seenEpisodeCount
+            progress
+            # __typename
+        }
+        # __typename
+    }
+}
+
+{
+  "first": 100,
+  "country": "SI",
+  "language": "en",
+  "popularTitlesFilter": {
+    "objectTypes": ["MOVIE"]
+  },
+  "popularTitlesSortBy": "TRENDING"
+}
+
+### // SHOW or POPULAR

@@ -1,0 +1,12 @@
+{
+  "name": "blindspot",
+  "version": "0.0.1",
+  "main": "index.js",
+  "repository": "https://github.com/otobrglez/blindspot",
+  "author": "Oto Brglez <otobrglez@gmail.com>",
+  "license": "MIT",
+  "private": false,
+  "dependencies": {
+    "astro": "^5.12.3"
+  }
+}

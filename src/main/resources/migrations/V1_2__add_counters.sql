@@ -1,0 +1,5 @@
+ALTER TABLE items
+    ADD COLUMN imdb_votes INTEGER;
+
+ALTER TABLE items
+    ADD COLUMN imdb_score DOUBLE PRECISION;
