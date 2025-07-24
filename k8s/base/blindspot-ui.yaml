@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: blindspot-ui
+  namespace: blindspot-prod
+  labels: { app: blindspot-ui }
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: blindspot-ui }
+  template:
+    metadata:
+      labels: { app: blindspot-ui }
+    spec:
+      imagePullSecrets: [ { name: ogrodje-regcred } ]
+      containers:
+        - name: blindspot-ui
+          image: registry.ogrodje.si/otobrglez/blindspot-ui:0.0.2
+          ports: [ { containerPort: 8080 } ]
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 120
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 20
+            periodSeconds: 50
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: blindspot-ui
+  namespace: blindspot-prod
+spec:
+  selector: { app: blindspot-ui }
+  ports:
+    - port: 80
+      targetPort: 8080
+  type: ClusterIP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: blindspot-ui
+  namespace: blindspot-prod
+  labels: { version: "1" }
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: blindspot.pinkstack.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: blindspot-ui
+                port: { number: 80 }

@@ -1,0 +1,34 @@
+---
+import {BLINDSPOT_ENV, BLINDSPOT_VERSION} from "astro:env/client";
+---
+<div class="container">
+  <h1>Blindspot</h1>
+  <p>Blindspot is a web app that scans global streaming catalogues and real‑time demand signals to spot the “white
+    spaces” your
+    content hasn’t reached yet. In seconds, it ranks regions with the highest upside, reveals exactly which titles
+    competitors host there, and projects the ROI of expanding or localising each show—all powered by a blend of live
+    APIs,
+    static market data, and AI optimisation. Put simply: Blindspot turns guesswork into data‑backed expansion plans,
+    so executives can green‑light their next billion‑viewer market before anyone else sees it.</p>
+
+  <p class="footnote">
+    - Oto Brglez / <a href="https://github.com/otobrglez">@otobrglez</a>
+  </p>
+
+  <p class="meta-info">BLINDSPOT_ENV: {BLINDSPOT_ENV}, BLINDSPOT_VERSION: {BLINDSPOT_VERSION}</p>
+</div>
+<style lang="scss">
+  .container {
+    margin: 0 auto;
+    max-width: 500px;
+    padding: 10pt
+  }
+  p.footnote a {
+    color: #666;
+  }
+  p.meta-info {
+    font-size: small;
+    text-align: center;
+    color: #666;
+  }
+</style>

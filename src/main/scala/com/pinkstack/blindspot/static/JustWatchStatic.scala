@@ -1,5 +1,6 @@
 package com.pinkstack.blindspot.static
 
+import com.pinkstack.blindspot.Model
 import io.circe.*
 import io.circe.parser.parse
 import zio.{Task, ZIO}
@@ -35,36 +36,5 @@ object JustWatchStatic:
     locales <- ZIO.fromEither(parse(raw)).flatMap(json => ZIO.fromEither(json.as[List[Locale]]))
   yield locales
 
-  // Hardcoded. This is POC after-all.
-  val supportedCountryCodes: Set[String] = Set(
-    "AU",
-    "CA",
-    "DE",
-    "DE",
-    "ES",
-    "FR",
-    "GB",
-    "HK",
-    "IN",
-    "IT",
-    "JP",
-    "NZ",
-    "SI",
-    "TR",
-    "US"
-  )
-
-  // Hardcoded. This is POC. (using slug)
-  val supportedPackages: Set[String] = Set(
-    "amazon-prime-video",
-    "apple-tv",
-    "apple-tv-plus",
-    "disney-plus",
-    "google-play-movies",
-    "hbo-max",
-    "hulu",
-    "mubi",
-    "netflix",
-    "paramount-pictures",
-    "paramount-plus"
-  )
+  val supportedCountryCodes: Set[String] = Model.supportedCountries.map(_.value)
+  val supportedPackages: Set[String]     = Model.supportedPackages.map(_.value)

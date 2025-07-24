@@ -5,7 +5,7 @@ import zio.Runtime.{removeDefaultLoggers, setConfigProvider}
 import zio.cli.*
 import zio.cli.HelpDoc.Empty
 import zio.logging.backend.SLF4J
-
+import com.pinkstack.blindspot
 object Main extends ZIOCliDefault:
   override val bootstrap: ZLayer[ZIOAppArgs, Any, Any] =
     setConfigProvider(ConfigProvider.envProvider) >>> removeDefaultLoggers >>> SLF4J.slf4j
@@ -27,7 +27,10 @@ object Main extends ZIOCliDefault:
   private val refreshJustWatch =
     Command("refresh-just-watch", options = dbOptions ++ blindspotEnv).withHelp("Refresh JustWatch")
 
-  private val command = mainCommand.subcommands(refreshJustWatch)
+  private val server =
+    Command("server", options = port ++ dbOptions ++ blindspotEnv).withHelp("Run Blindspot Server")
+
+  private val command = mainCommand.subcommands(refreshJustWatch, server)
 
   val cliApp: CliApp[ZIOAppArgs & Scope, Throwable, Unit] =
     CliApp.make(
@@ -48,6 +51,30 @@ object Main extends ZIOCliDefault:
         RefreshJustWatch.run.withConfigProvider(
           ConfigProvider.fromMap(
             Map(
+              "postgres_user"     -> postgresUser,
+              "postgres_password" -> postgresPassword,
+              "postgres_host"     -> postgresHost,
+              "postgres_port"     -> postgresPort.toString,
+              "postgres_db"       -> postgresDb,
+              "blindspot_env"     -> blindspotEnv
+            )
+          )
+        )
+      case (
+            port: BigInt,
+            (
+              postgresUser: String,
+              postgresPassword: String,
+              postgresHost: String,
+              postgresPort: BigInt,
+              postgresDb: String
+            ),
+            blindspotEnv: String
+          ) =>
+        BlindspotServer.run.withConfigProvider(
+          ConfigProvider.fromMap(
+            Map(
+              "port"              -> port.toString,
               "postgres_user"     -> postgresUser,
               "postgres_password" -> postgresPassword,
               "postgres_host"     -> postgresHost,

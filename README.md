@@ -6,6 +6,20 @@ competitors host there, and projects the ROI of expanding or localising each sho
 static market data, and AI optimisation. Put simply: Blindspot turns guesswork into data‑backed expansion plans, so
 executives can green‑light their next billion‑viewer market before anyone else sees it.
 
+## Development
+
+- This is a mono-repository that has backend and frontend bundled together into a single codebase.
+- The project uses [devenv](https://devenv.sh/) for managing dependencies and development environment.
+- Use [just](https://github.com/casey/just) command runner to build and deploy things.
+
+```bash
+just docker-build-all # will build all images
+just docker-push-all # will push all images
+
+just deploy-all # will build and deploy
+```
+
+
 ## Resources and sources
 
 - https://github.com/ignaciovaquero/go-justwatch/blob/32bba57e186d5ababa604123048f401089878f07/provider.go#L11

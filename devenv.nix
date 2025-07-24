@@ -1,7 +1,7 @@
 { pkgs, lib, config, inputs, ... }:
 
 let
-  pkgs-unstable = import inputs.nixpkgs-unstable { 
+  pkgs-unstable = import inputs.nixpkgs-unstable {
     system = pkgs.stdenv.system;
   };
 
@@ -12,12 +12,14 @@ in
   name = "blindspot";
   env.BLINDSPOT_ENV = "Development";
 
-  packages = [ 
-    pkgs.git 
+  packages = [
+    pkgs.yq-go
+    pkgs.git
     pkgs-unstable.k9s
     pkgs-unstable.kubectl
     pkgs-unstable.kubectx
     pkgs-unstable.nodejs_24
+    pkgs-unstable.just
   ];
 
   languages.java = {
@@ -44,6 +46,13 @@ in
 
     export SBT_OPTS="--sun-misc-unsafe-memory-access=allow \
                      --enable-native-access=ALL-UNNAMED"
+
+    echo "Installing dependencies"
+    yarn install && cd blindspot-ui; yarn install; cd ..
+
+    echo "Setting kubectx"
+    export KUBECONFIG="ogrodje-one-config"
+    kubens blindspot-prod
   '';
 
   enterTest = ''

@@ -57,14 +57,18 @@ lazy val root = project
   .settings(
     dockerExposedPorts ++= Seq(7779),
     dockerExposedUdpPorts    := Seq.empty[Int],
-    dockerUsername           := Some("pinkstack"),
+    dockerUsername           := Some("otobrglez"),
     dockerUpdateLatest       := true,
-    dockerRepository         := Some("ghcr.io"),
-    dockerBaseImage          := "azul/zulu-openjdk:24-jre-headless-latest\"",
+    dockerRepository         := Some("registry.ogrodje.si"),
+    dockerBaseImage          := "azul/zulu-openjdk:24-jre-headless-latest",
     Docker / daemonUserUid   := None,
     Docker / daemonUser      := "root",
     dockerPermissionStrategy := DockerPermissionStrategy.None,
     packageName              := "blindspot",
+    // dockerAliases ++= Seq(
+    //   // dockerAlias.value.withTag(Option("stable")),
+    //   dockerAlias.value.withRegistryHost(Option("registry.ogrodje.si"))
+    // ),
     dockerCommands           := dockerCommands.value.flatMap {
       case cmd @ Cmd("WORKDIR", _) =>
         List(
