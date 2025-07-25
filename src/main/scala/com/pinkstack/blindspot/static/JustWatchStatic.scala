@@ -19,13 +19,15 @@ object JustWatchStatic:
   )
   private given decoder: Decoder[Locale] = (c: HCursor) =>
     for
-      fullLocale     <- c.downField("full_locale").as[String].map(_.trim)
-      iso31662       <- c.downField("iso_3166_2").as[String].map(_.trim)
-      country        <- c.downField("country").as[String].map(_.trim)
-      exposedUrlPart <- c.downField("exposed_url_part").as[String].map(_.trim).map(_.toUpperCase)
-      currency       <- c.downField("currency").as[String].map(_.trim)
-      timezone       <- c.downField("timezone").as[String].map(_.trim)
-    yield Locale(fullLocale, iso31662, country, exposedUrlPart, currency, timezone)
+      fullLocale           <- c.downField("full_locale").as[String].map(_.trim)
+      iso31662             <- c.downField("iso_3166_2").as[String].map(_.trim)
+      country              <- c.downField("country").as[String].map(_.trim)
+      exposedUrlPart       <- c.downField("exposed_url_part").as[String].map(_.trim).map(_.toUpperCase)
+      // This is hack
+      exposedUrlPartPatched = if exposedUrlPart == "uk" then "gb" else exposedUrlPart
+      currency             <- c.downField("currency").as[String].map(_.trim)
+      timezone             <- c.downField("timezone").as[String].map(_.trim)
+    yield Locale(fullLocale, iso31662, country, exposedUrlPart = exposedUrlPartPatched, currency, timezone)
 
   private def readLocalesState(): String =
     Using(Source.fromResource("static/locales_state.json"))(_.mkString)

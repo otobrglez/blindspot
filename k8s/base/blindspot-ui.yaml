@@ -5,7 +5,7 @@ metadata:
   namespace: blindspot-prod
   labels: { app: blindspot-ui }
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels: { app: blindspot-ui }
   template:

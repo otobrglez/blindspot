@@ -14,13 +14,13 @@ import zio.http.Middleware.{cors, CorsConfig}
 object BlindspotServer:
 
   private def optionalStringToList(op: Option[String]): List[String] =
-    op.fold(List.empty[String])(_.split(",").toList)
+    op.fold(List.empty[String])(_.split("-").toList)
 
   private val routes: Routes[DB, Nothing] = Routes(
     Method.GET / "grid"      -> handler { (req: Request) =>
       Grid
         .showFor(
-          query = req.queryOrElse[Option[String]]("query", None),
+          query = req.queryOrElse[Option[String]]("query", None).filter(_.nonEmpty),
           kind = optionalStringToList(req.queryOrElse[Option[String]]("kind", None)).map(Model.ItemKind.withName),
           page = req.queryOrElse[Option[Int]]("page", None).getOrElse(1),
           pageSize = req.queryOrElse[Option[Int]]("pageSize", None).getOrElse(100)
@@ -37,17 +37,16 @@ object BlindspotServer:
     },
     Method.GET / "config"    -> handler {
       val config = Json.obj(
-        "packages"  -> Model.supportedPackages.toList.sortBy(pkg => (-pkg.priority, pkg.name)).asJson,
-        "countries" -> Model.supportedCountries.toList.sortBy(country => (-country.priority, country.name)).asJson
+        "packages"  -> Model.supportedPackages.toList.sortBy(pkg => -pkg.priority -> pkg.name).asJson,
+        "countries" -> Model.supportedCountries.toList.sortBy(country => -country.priority -> country.name).asJson,
+        "platforms" -> Model.supportedPlatforms.toList.sortBy(p => -p.priority -> p.name).asJson
       )
       Response.json(config.asJson.noSpaces)
     }
-  ).handleErrorZIO(th =>
-    logError(s"Served crash of ${th.getMessage}").as {
-      Response
-        .json(Json.obj("error" -> Json.fromString(th.getMessage)).noSpaces)
-        .copy(status = Status.InternalServerError)
-    }
+  ).handleError(th =>
+    Response
+      .json(Json.obj("error" -> Json.fromString(th.getMessage)).noSpaces)
+      .copy(status = Status.InternalServerError)
   )
 
   private val corsConfig: CorsConfig = CorsConfig(

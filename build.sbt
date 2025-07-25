@@ -80,6 +80,18 @@ lazy val root = project
           cmd
         )
       case other                   => List(other)
+    },
+    dockerBuildCommand := {
+      val arch = sys.props("os.arch")
+      if (arch != "amd64" && !arch.contains("x86")) {
+        // use buildx with platform to build supported amd64 images on other CPU architectures
+        // this may require that you have first run 'docker buildx create' to set docker buildx up
+        dockerExecCommand.value ++ Seq(
+          "buildx",
+          "build",
+          "--platform=linux/amd64",
+          "--load") ++ dockerBuildOptions.value :+ "."
+      } else dockerBuildCommand.value
     }
   )
 

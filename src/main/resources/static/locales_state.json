@@ -146,6 +146,8 @@
     "country": "United Kingdom",
     "i18n_state": "active",
     "exposed_url_part": "uk",
+    "todo": 1,
+    "x_exposed_url_part": "gb",
     "currency": "GBP",
     "currency_name": "Pound Sterling",
     "country_names": {

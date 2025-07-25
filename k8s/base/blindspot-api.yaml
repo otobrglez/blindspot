@@ -1,0 +1,94 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: blindspot-api
+  namespace: blindspot-prod
+  labels: { app: blindspot-api }
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: blindspot-api }
+  template:
+    metadata:
+      labels: { app: blindspot-api }
+    spec:
+      imagePullSecrets: [ { name: ogrodje-regcred } ]
+      containers:
+        - name: blindspot-api
+          image: registry.ogrodje.si/otobrglez/blindspot:0.0.5
+          ports: [ { containerPort: 7779 } ]
+          args: [
+            "server",
+            "--postgres-host=$(POSTGRES_HOST)",
+            "--postgres-port=$(POSTGRES_PORT)",
+            "--postgres-user=$(POSTGRES_USER)",
+            "--postgres-password=$(POSTGRES_PASSWORD)",
+            "--postgres-db=$(POSTGRES_DB)"
+          ]
+          env:
+            - { name: OTEL_TRACES_EXPORTER, value: "none" }
+            - { name: OTEL_METRICS_EXPORTER, value: "none" }
+            - { name: OTEL_LOGS_EXPORTER, value: "none" }
+            - name: JAVA_OPTS
+              value: "--sun-misc-unsafe-memory-access=allow --enable-native-access=ALL-UNNAMED"
+            - name: POSTGRES_PASSWORD
+              valueFrom: { secretKeyRef: { name: blindspot-secret, key: postgres_password } }
+            - name: POSTGRES_HOST
+              valueFrom: { secretKeyRef: { name: blindspot-secret, key: postgres_host } }
+            - name: POSTGRES_PORT
+              valueFrom: { secretKeyRef: { name: blindspot-secret, key: postgres_port } }
+            - name: POSTGRES_USER
+              valueFrom: { secretKeyRef: { name: blindspot-secret, key: postgres_user } }
+            - name: POSTGRES_DB
+              valueFrom: { secretKeyRef: { name: blindspot-secret, key: postgres_db } }
+          livenessProbe:
+            httpGet:
+              path: /grid
+              port: 7779
+            initialDelaySeconds: 45
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /grid
+              port: 7779
+            initialDelaySeconds: 20
+            periodSeconds: 50
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: blindspot-api
+  namespace: blindspot-prod
+spec:
+  selector: { app: blindspot-api }
+  ports:
+    - port: 80
+      targetPort: 7779
+  type: ClusterIP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: blindspot-api
+  namespace: blindspot-prod
+  labels: { version: "1" }
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      more_set_headers "Access-Control-Allow-Origin: https://blindspot.pinkstack.com";
+      more_set_headers "Access-Control-Allow-Methods: *";
+      more_set_headers "Access-Control-Allow-Headers: *";
+      more_set_headers "Access-Control-Expose-Headers: Content-Length,Content-Range";
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: blindspot-api.pinkstack.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: blindspot-api
+                port: { number: 80 }

@@ -1,0 +1,50 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: refresh-just-watch
+  namespace: blindspot-prod
+  labels: { app: refresh-just-watch }
+spec:
+  ttlSecondsAfterFinished: 45  # Delete 2 minutes after
+  backoffLimit: 0
+  template:
+    metadata:
+      labels: { app: refresh-just-watch }
+    spec:
+      imagePullSecrets: [ { name: ogrodje-regcred } ]
+      restartPolicy: Never
+      containers:
+        - name: blindspot
+          image: registry.ogrodje.si/otobrglez/blindspot:0.0.7
+          args: [
+            "refresh-just-watch",
+            "--postgres-host=$(POSTGRES_HOST)",
+            "--postgres-port=$(POSTGRES_PORT)",
+            "--postgres-user=$(POSTGRES_USER)",
+            "--postgres-password=$(POSTGRES_PASSWORD)",
+            "--postgres-db=$(POSTGRES_DB)"
+          ]
+          env:
+            - name: JAVA_OPTS
+              value: >-
+                --sun-misc-unsafe-memory-access=allow
+                --enable-native-access=ALL-UNNAMED
+            - { name: OTEL_TRACES_EXPORTER, value: "none" }
+            - { name: OTEL_METRICS_EXPORTER, value: "none" }
+            - { name: OTEL_LOGS_EXPORTER, value: "none" }
+            - name: HTTP_PROXY
+              valueFrom: { secretKeyRef: { name: blindspot-secret, key: http_proxy } }
+            - name: HTTP_PROXY_PASS
+              valueFrom: { secretKeyRef: { name: blindspot-secret, key: http_proxy_pass } }
+            - name: HTTP_PROXY_USER
+              valueFrom: { secretKeyRef: { name: blindspot-secret, key: http_proxy_user } }
+            - name: POSTGRES_PASSWORD
+              valueFrom: { secretKeyRef: { name: blindspot-secret, key: postgres_password } }
+            - name: POSTGRES_HOST
+              valueFrom: { secretKeyRef: { name: blindspot-secret, key: postgres_host } }
+            - name: POSTGRES_PORT
+              valueFrom: { secretKeyRef: { name: blindspot-secret, key: postgres_port } }
+            - name: POSTGRES_USER
+              valueFrom: { secretKeyRef: { name: blindspot-secret, key: postgres_user } }
+            - name: POSTGRES_DB
+              valueFrom: { secretKeyRef: { name: blindspot-secret, key: postgres_db } }

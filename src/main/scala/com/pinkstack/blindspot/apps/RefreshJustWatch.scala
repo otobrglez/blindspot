@@ -1,14 +1,14 @@
 package com.pinkstack.blindspot.apps
 
-import com.pinkstack.blindspot.clients.JustWatch
+import com.pinkstack.blindspot.ZIOOps.logExecution
+import com.pinkstack.blindspot.clients.{EnhancedClient, JustWatch}
 import com.pinkstack.blindspot.db.{Countries, DB, Items, Packages}
 import com.pinkstack.blindspot.static.JustWatchStatic
 import com.pinkstack.blindspot.static.JustWatchStatic.Locale
 import zio.*
 import zio.ZIO.logInfo
-import zio.http.Client
+import zio.http.*
 import zio.stream.ZStream
-import com.pinkstack.blindspot.ZIOOps.{logExecution, given}
 
 object RefreshJustWatch:
 
@@ -77,16 +77,18 @@ object RefreshJustWatch:
     _ <- syncCountries.logExecution("Sync countries")
     _ <- syncPackages.logExecution("Sync packages")
 
-    // _ <- syncCountry("SI", maxPageItems = 200).logExecution("Sync country")
+    // For development. Pick just one country per code.
+    //  <- syncCountry("GB", maxPageItems = 200).logExecution("Sync country")
 
     _ <- syncCountryItems(maxPageItems = 1500).logExecution("Sync country items")
   yield ()
 
-  def run = program
-    .provide(
-      Scope.default,
-      Client.default,
-      JustWatch.live,
-      DB.transactorLayer
-    )
-    .tapError(th => zio.Console.printLine(s"🔥 Crashed: ${th.getMessage} @ ${th.printStackTrace()}"))
+  def run =
+    program
+      .provide(
+        Scope.default,
+        EnhancedClient.live,
+        JustWatch.live,
+        DB.transactorLayer
+      )
+      .tapError(th => zio.Console.printLine(s"🔥 Crashed: ${th.getMessage} @ ${th.printStackTrace()}"))

@@ -46,7 +46,7 @@ object Grid:
       pageSize: Int = 100
     ): Fragment =
       val rankFiled    = query.fold(fr"1.0")(_ => fr"ts_rank(i.title_vec, query)")
-      val searchVector = query.fold(fr"")(q => fr", to_tsquery('english', $q) as query")
+      val searchVector = query.fold(fr"")(q => fr", plainto_tsquery('english', $q) as query")
 
       val init =
         sql"""
@@ -61,19 +61,28 @@ object Grid:
              """
 
       val where = (query, kind, countries, packages) match
-        case (Some(_), Nil, _, _)   => fr" WHERE title_vec @@ query"
-        case (Some(_), kinds, _, _) =>
+        case (Some(_), Nil, _, _)         => fr" WHERE title_vec @@ query"
+        case (Some(_), kind :: Nil, _, _) =>
           fr" WHERE title_vec @@ query " ++
-            fr"AND i.kind IN (${kinds.map(_.entryName.toUpperCase).mkString(",")})"
-        case _                      =>
-          fr" WHERE original_release_year=date_part('year', now()) AND tomato_meter IS NOT NULL "
+            fr"AND i.kind = ${kind.entryName.toUpperCase} "
+        case (None, kind :: Nil, _, _)    =>
+          fr" WHERE i.kind = ${kind.entryName.toUpperCase} "
+
+        case (Some(_), _, _, _)           => fr" WHERE title_vec @@ query"
+        case _                            =>
+          fr" WHERE tomato_meter IS NOT NULL AND imdb_score IS NOT NULL AND imdb_votes IS NOT NULL "
 
       val ordering = (query, kind, countries, packages) match
         case (Some(_), _, _, _) => fr" ORDER BY rank DESC"
-        case (None, _, _, _)    => fr" ORDER BY tomato_meter DESC, original_release_year DESC"
+        case (None, _, _, _)    =>
+          fr" ORDER BY tomato_meter DESC NULLS LAST, original_release_year DESC, imdb_votes DESC NULLS LAST, imdb_score DESC NULLS LAST"
+
+      val notFuture = fr" AND original_release_year <= date_part('year', now())"
 
       val pagination = fr" LIMIT $pageSize OFFSET ${(page - 1) * pageSize}"
-      init ++ where ++ ordering ++ pagination
+      val fragments  = init ++ where ++ notFuture ++ ordering ++ pagination
+      println(fragments.toString)
+      fragments
 
     def showQuery(
       query: Option[String] = None,

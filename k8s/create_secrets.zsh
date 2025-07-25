@@ -1,35 +1,22 @@
 set -ex
 
-export NS=goo-prod
+export NS=blindspot-prod
 
-# goo-secret
-kubectl delete secret goo-secret --namespace=$NS --ignore-not-found
-
-kubectl create secret generic --namespace=$NS \
-  goo-secret \
-  --from-literal=hygraph_endpoint=$HYGRAPH_ENDPOINT \
-  --from-literal=sentry_auth_token=$SENTRY_AUTH_TOKEN
-
-# koofr-secret
-kubectl delete secret koofr-secret --namespace=$NS --ignore-not-found
+kubectl delete secret blindspot-secret --namespace=$NS --ignore-not-found
 
 kubectl create secret generic --namespace=$NS \
-  koofr-secret \
-  --from-literal=koofr_password=$KOOFR_PASSWORD \
-  --from-literal=koofr_username=$KOOFR_USERNAME \
-  --from-literal=webhook_url_1=$WEBHOOK_URL_1
+  blindspot-secret \
+  --from-literal=postgres_host=pg-one-postgresql.goo-prod.svc.cluster.local \
+  --from-literal=postgres_port=5432 \
+  --from-literal=postgres_user=$POSTGRES_PROD_USER \
+  --from-literal=postgres_password=$POSTGRES_PROD_PASSWORD \
+  --from-literal=postgres_db=$POSTGRES_PROD_DB \
+  --from-literal=http_proxy=$HTTP_PROXY \
+  --from-literal=http_proxy_pass=$HTTP_PROXY_PASS \
+  --from-literal=http_proxy_user=$HTTP_PROXY_USER
 
-# koofr-secret
-kubectl delete secret keycloak-secret --namespace=$NS --ignore-not-found
+kubectl delete secret ssh-private-key --namespace=$NS --ignore-not-found
 
-kubectl create secret generic --namespace=$NS \
-  keycloak-secret \
-  --from-literal=keycloak_admin=$KEYCLOAK_ADMIN \
-  --from-literal=keycloak_admin_password=$KEYCLOAK_ADMIN_PASSWORD \
-  --from-literal=keycloak_db=$KEYCLOAK_DB \
-  --from-literal=keycloak_realm=$KEYCLOAK_REALM \
-  --from-literal=keycloak_endpoint=$KEYCLOAK_ENDPOINT \
-  --from-literal=kc_db_url=jdbc:postgresql://pg-one-postgresql.goo-prod.svc.cluster.local:5432/${KEYCLOAK_DB} \
-  --from-literal=kc_db_username=$POSTGRES_USER \
-  --from-literal=kc_db_password=$POSTGRES_PASSWORD
-
+# kubectl create secret generic --namespace=$NS \
+#   ssh-private-key \
+#   --from-file=id_rsa_og_events=/Users/oto/.ssh/id_rsa_og_events

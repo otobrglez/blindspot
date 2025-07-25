@@ -33,9 +33,13 @@ docker-push-backend:
   docker push --all-tags registry.ogrodje.si/otobrglez/blindspot
 
 docker-build-all: docker-build-ui docker-build-backend
-docker-push-all: docker-push-ui docker-push-backend
+docker-push-all: docker-push-backend docker-push-ui
 
 k9s-deploy-all:
   kubectl apply -k k8s/base -n blindspot-prod
 
+deploy-backend: docker-build-backend docker-push-backend
+deploy-ui: docker-build-ui docker-push-ui
+
+# It is better idea to deploy backend and then ui
 deploy-all: docker-build-all docker-push-all k9s-deploy-all

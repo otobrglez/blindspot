@@ -4,10 +4,11 @@ import com.pinkstack.blindspot.clients.JsoupOps.given
 import com.pinkstack.blindspot.clients.JustWatch.Item
 import io.circe.Decoder.decodeList
 import io.circe.{Decoder, Json}
-import zio.ZIO.logInfo
+import zio.ZIO.{logError, logInfo}
 import zio.http.*
 import zio.stream.ZStream
 import zio.{RIO, RLayer, Scope, ZIO, ZLayer}
+import zio.durationInt
 
 final class JustWatch private (val client: Client) extends GraphQLClient:
   import JustWatch.Package
@@ -41,7 +42,7 @@ final class JustWatch private (val client: Client) extends GraphQLClient:
     first: Int = perItems,
     objectType: String = "MOVIE",            // "SHOW"
     popularTitlesSortBy: String = "TRENDING" // "POPULAR"
-  ) = queryAs[List[Item]](
+  ): RIO[Scope, List[Item]] = queryAs[List[Item]](
     """query GetPopularTitles(
       |    $country: Country!,
       |    $language: Language!,
@@ -99,7 +100,9 @@ final class JustWatch private (val client: Client) extends GraphQLClient:
     "country"             -> Json.fromString(country),
     "popularTitlesSortBy" -> Json.fromString(popularTitlesSortBy),
     "popularTitlesFilter" -> Json.obj("objectTypes" -> Json.fromString(objectType))
-  )
+  ).catchSome { case e: Throwable =>
+    logError(s"Error getting popular titles for $country: ${e.getMessage}").as(List.empty[Item])
+  }
 
   def collectItems(
     country: String,
@@ -110,13 +113,15 @@ final class JustWatch private (val client: Client) extends GraphQLClient:
     offset     <- ZStream.iterate(0)(_ + perItems).takeWhile(_ <= maxItems)
     items      <-
       ZStream.fromZIO(
-        getPopularTitles(country, offset = offset, objectType = objectType, popularTitlesSortBy = popularity)
-          .tap(items =>
+        getPopularTitles(country, offset = offset, objectType = objectType, popularTitlesSortBy = popularity).timed
+          .tap((duration, items) =>
             logInfo(
               s"Collected for $country, offset: $offset, objectType: $objectType, " +
-                s"popularity: $popularity, size: ${items.size}"
+                s"popularity: $popularity, size: ${items.size} in ${duration.toMillis}ms"
             )
           )
+          .map(_._2)
+          .retry(zio.Schedule.exponential(2.second) && zio.Schedule.recurs(4))
       )
   yield items.map(country -> _)
 

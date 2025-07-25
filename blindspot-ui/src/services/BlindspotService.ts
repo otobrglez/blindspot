@@ -113,9 +113,16 @@ export interface Country {
   priority: number
 }
 
+export interface Platform {
+  name: string
+  value: Set<string>
+  priority: number
+}
+
 export interface ServerConfig {
   packages: Package[],
-  countries: Country[]
+  countries: Country[],
+  platforms: Platform[]
 }
 
 export interface Row {
@@ -132,9 +139,16 @@ export interface Row {
   kind: ItemKind
 }
 
-enum ItemKind {
+export enum ItemKind {
   Movie = 'Movie',
   Show = 'Show',
+}
+
+export enum GridMode {
+  Platform = "Platform",
+  Country = "Country",
+  CountryPlatform = "CountryPlatform",
+  PlatformCountry = "PlatformCountry",
 }
 
 export type Grid = Row[]
@@ -146,7 +160,18 @@ export class BlindspotAPI extends BlindspotService {
     return this.api.get(`/config`)
   }
 
-  static async grid(query?: string): Promise<Grid> {
-    return this.api.get(`/grid`)
+  static async grid(
+    query: string,
+    showMovies: boolean,
+    showShows: boolean,
+  ): Promise<Grid> {
+    const map = new Map<string, string>([
+      ['kind',
+        [(showMovies ? "Movie" : ""), (showShows ? "Show" : "")].filter(x => x != "").join("-")
+      ],
+      ['query', query ? query : ""],
+    ].filter(x => x[1] !== "") as any);
+
+    return this.api.get(`/grid`, map)
   }
 }

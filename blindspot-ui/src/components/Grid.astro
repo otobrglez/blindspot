@@ -8,5 +8,6 @@ BlindspotSingletonService.initService({
 })
 
 const grid = await BlindspotAPI.grid();
+const config = await BlindspotAPI.config();
 ---
-<LiveGrid client:load initialData={grid}/>
+<LiveGrid client:load initialGrid={grid} initialConfig={config}/>
