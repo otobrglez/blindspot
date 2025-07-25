@@ -6,4 +6,4 @@ images:
   - name: registry.ogrodje.si/otobrglez/blindspot
     newTag: '0.0.7'
   - name: registry.ogrodje.si/otobrglez/blindspot-ui
-    newTag: '0.0.7'
+    newTag: '0.0.9'

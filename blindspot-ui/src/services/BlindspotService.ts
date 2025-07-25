@@ -153,6 +153,18 @@ export enum GridMode {
 
 export type Grid = Row[]
 
+export interface GridOptions {
+  query: string
+  showMovies: boolean
+  showShows: boolean
+}
+
+export const defaultGridOptions: GridOptions = {
+  query: "",
+  showMovies: true,
+  showShows: true,
+}
+
 export class BlindspotAPI extends BlindspotService {
   private static api: BlindspotAPI = new BlindspotAPI();
 
@@ -160,11 +172,8 @@ export class BlindspotAPI extends BlindspotService {
     return this.api.get(`/config`)
   }
 
-  static async grid(
-    query: string,
-    showMovies: boolean,
-    showShows: boolean,
-  ): Promise<Grid> {
+  static async grid(options: GridOptions = defaultGridOptions): Promise<Grid> {
+    const {query, showMovies, showShows} = options;
     const map = new Map<string, string>([
       ['kind',
         [(showMovies ? "Movie" : ""), (showShows ? "Show" : "")].filter(x => x != "").join("-")

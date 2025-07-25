@@ -1,5 +1,7 @@
 ---
 import '@fontsource/barlow';
+import {Image} from 'astro:assets';
+import localBirdImage from '../assets/blindspotLogo.png';
 ---
 <!doctype html>
 <html lang="en">
@@ -11,9 +13,14 @@ import '@fontsource/barlow';
   <title>Blindspot</title>
 </head>
 <body>
-
+<div class="big-wrap">
+  <header>
+    <div class="logo">Blindspot
+      <Image src={localBirdImage} alt="Blindspot Logo"/>
+    </div>
+  </header>
   <slot/>
-
+</div>
 </body>
 </html>
 <style lang="scss" is:global>
@@ -28,7 +35,7 @@ import '@fontsource/barlow';
     font-weight: 400;
     font-size: 11pt;
     line-height: 1.2;
-    padding: 10px
+    padding: 5px
   }
 
   label, select, option, input {
@@ -41,5 +48,30 @@ import '@fontsource/barlow';
     font-weight: 700;
     margin: 0;
     margin-bottom: 5px;
+  }
+
+  .big-wrap {
+    max-width: 1750px;
+    margin: 0 auto;
+    padding: 10px;
+  }
+
+  div.logo {
+    font-weight: 700;
+    font-family: 'Barlow', sans-serif;
+    display: block;
+    height: 40px;
+    line-height: 40px;
+    font-size: 20pt;
+    vertical-align: middle;
+
+    img {
+      // background-color: red;
+      // margin: 2px;
+      display: inline-block;
+      height: 50%;
+      width: fit-content;
+      vertical-align: middle;
+    }
   }
 </style>

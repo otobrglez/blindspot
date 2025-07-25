@@ -38,7 +38,12 @@ const gridConfig = ref<GridConfig>({
 })
 
 async function fetchData(gridConfig: GridConfig) {
-  live.value = await BlindspotAPI.grid(gridConfig.query, gridConfig.showMovies, gridConfig.showShows);
+  live.value = await BlindspotAPI.grid({
+      query: gridConfig.query,
+      showMovies: gridConfig.showMovies,
+      showShows: gridConfig.showShows
+    }
+  );
 }
 
 onMounted(() => {
@@ -52,17 +57,14 @@ watch(gridConfig, async (newConfig) => {
 </script>
 <template>
   <div>
-    <h1>Blindspot</h1>
-
     <div class="grid-tools">
-      <div class="grid-block">
-        <span>Stats</span>
-        <label><input type="checkbox" v-model="gridConfig.showIMDB"/>IMDB</label>
-        <label><input type="checkbox" v-model="gridConfig.showTMDB"/>TMDB</label>
-        <label><input type="checkbox" v-model="gridConfig.showTomato"/>Tomato</label>
+      <div class="tool-block">
+        <label>Search
+          <input type="search" v-model="gridConfig.query" placeholder="Title of movie or show,..."/>
+        </label>
       </div>
 
-      <div class="grid-block">
+      <div class="tool-block">
         <label>
           Kind
           <label><input type="checkbox" v-model="gridConfig.showMovies"/>Movies</label>
@@ -70,7 +72,16 @@ watch(gridConfig, async (newConfig) => {
         </label>
       </div>
 
-      <div class="grid-block">
+      <div class="tool-block">
+        <span>Show stats</span>
+        <label><input type="checkbox" v-model="gridConfig.showIMDB"/>IMDB</label>
+        <label><input type="checkbox" v-model="gridConfig.showTMDB"/>TMDB</label>
+        <label><input type="checkbox" v-model="gridConfig.showTomato"/>Rotten Tomatoes</label>
+      </div>
+
+
+
+      <div class="tool-block">
         <label>
           View
           <select v-model="gridConfig.gridMode">
@@ -81,16 +92,11 @@ watch(gridConfig, async (newConfig) => {
           </select>
         </label>
       </div>
-      <div class="grid-block">
-        <span>Lookup</span>
+      <div class="tool-block">
         <label><input type="checkbox" v-model="gridConfig.flippedLookup"/>Flip</label>
       </div>
 
-      <div class="grid-block">
-        <label>Search
-          <input type="search" v-model="gridConfig.query" placeholder="Title of movie or show,..."/>
-        </label>
-      </div>
+
     </div>
 
     <div class="grid">
@@ -115,9 +121,9 @@ watch(gridConfig, async (newConfig) => {
 
       <div class="data-space">
         <div class="grid-item no-hover">
-          <div class="col"></div>
-          <div class="col">Kind</div>
-          <div class="col">Year</div>
+          <div class="col" style="max-width: 450px"></div>
+          <div class="col fix-one">Kind</div>
+          <div class="col fix-one">Year</div>
           <div class="col" v-if="gridConfig.showIMDB">IMDB V.</div>
           <div class="col" v-if="gridConfig.showIMDB">IMDB S.</div>
           <div class="col" v-if="gridConfig.showTMDB">TMDB S.</div>
@@ -162,7 +168,7 @@ watch(gridConfig, async (newConfig) => {
   display: table-row;
   border-bottom: 1px solid #dddddd;
 
-  &.no-border{
+  &.no-border {
     border-bottom: none !important;
   }
 }
@@ -180,8 +186,39 @@ watch(gridConfig, async (newConfig) => {
   padding: 6px;
   text-align: left;
 
+  &.fix-one {
+    width: 100px;
+  }
+
   &.center {
     text-align: center;
   }
+  &.right {
+    text-align: right;
+  }
 }
+
+.grid-tools {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  margin-top: 10px;
+  padding: 10px;
+
+  background-color: #EEE;
+  border-radius: 5px 5px 0px 0px;
+
+  .tool-block {
+    display: flex;
+    flex-direction: row;
+    margin-right: 10px;
+
+    label {
+      margin-right: 10px;
+    }
+  }
+}
+
 </style>
