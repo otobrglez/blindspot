@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {ref, defineProps, onMounted, watch} from 'vue';
-import {type Grid, GridMode, type ServerConfig} from "../services/BlindspotService.ts";
+import {type Grid, GridMode, ItemKind, type ServerConfig} from "../services/BlindspotService.ts";
 import {BlindspotAPI, BlindspotSingletonService} from "../services/BlindspotService";
 import {BLINDSPOT_ENDPOINT} from 'astro:env/client';
 import GridCell from "./GridCell.vue";
@@ -79,8 +79,6 @@ watch(gridConfig, async (newConfig) => {
         <label><input type="checkbox" v-model="gridConfig.showTomato"/>Rotten Tomatoes</label>
       </div>
 
-
-
       <div class="tool-block">
         <label>
           View
@@ -95,15 +93,13 @@ watch(gridConfig, async (newConfig) => {
       <div class="tool-block">
         <label><input type="checkbox" v-model="gridConfig.flippedLookup"/>Flip</label>
       </div>
-
-
     </div>
 
     <div class="grid">
       <div class="data-space">
         <div class="grid-item no-border no-hover">
           <div class="col offset-col" v-for="_ in (
-            1 + 2 + (gridConfig.showIMDB ? 2 : 0) + (gridConfig.showTMDB ? 2: 0) + (gridConfig.showTomato ? 1: 0)
+            1 + 3 + (gridConfig.showIMDB ? 2 : 0) + (gridConfig.showTMDB ? 2: 0) + (gridConfig.showTomato ? 1: 0)
             )">
           </div>
           <div class="col center"
@@ -121,8 +117,9 @@ watch(gridConfig, async (newConfig) => {
 
       <div class="data-space">
         <div class="grid-item no-hover">
-          <div class="col" style="max-width: 450px"></div>
-          <div class="col fix-one">Kind</div>
+          <div class="col center" style="width: 20px"></div>
+          <div class="col" style="width: 350px"></div>
+          <div class="col fix-one center">AI</div>
           <div class="col fix-one">Year</div>
           <div class="col" v-if="gridConfig.showIMDB">IMDB V.</div>
           <div class="col" v-if="gridConfig.showIMDB">IMDB S.</div>
@@ -134,11 +131,23 @@ watch(gridConfig, async (newConfig) => {
       </div>
 
       <div class="data-space">
-        <div class="grid-item" v-for="row in live" :key="row.id">
+        <div class="grid-item magic-row" v-for="row in live" :key="row.id">
           <!-- <div class="col">{{ item.id }}</div> -->
           <!-- <div class="col">{{ item.rank }}</div> -->
+
+          <div class="col">
+            <img v-if="row.kind === ItemKind.Movie" src="/film.png" alt="Movie" class="icon"/>
+            <img v-if="row.kind === ItemKind.Show" src="/show.png" alt="Show" class="icon"/>
+          </div>
           <div class="col">{{ row.title }}</div>
-          <div class="col">{{ row.kind }}</div>
+          <div class="col center">
+            <div class="tools">
+              <a href="#chat">
+                <img src="/aiChat.png" alt="Blindspot Logo" class="icon"/>
+              </a>
+            </div>
+          </div>
+
           <div class="col">{{ row.releaseYear }}</div>
           <div class="col" v-if="gridConfig.showIMDB">{{ row.imdbVotes }}</div>
           <div class="col" v-if="gridConfig.showIMDB">{{ row.imdbScore }}</div>
@@ -162,14 +171,26 @@ watch(gridConfig, async (newConfig) => {
 
 .data-space {
   display: table-row-group;
+
+  .magic-row:last-child {
+    border-bottom: none !important;
+  }
 }
 
 .grid-item {
   display: table-row;
   border-bottom: 1px solid #dddddd;
+  vertical-align: middle;
 
   &.no-border {
     border-bottom: none !important;
+  }
+
+
+  img.icon {
+    height: 18px;
+    width: 18px;
+    margin-right: 5px;
   }
 }
 
@@ -185,14 +206,16 @@ watch(gridConfig, async (newConfig) => {
   display: table-cell;
   padding: 6px;
   text-align: left;
+  vertical-align: middle;
 
   &.fix-one {
-    width: 100px;
+    width: 60px;
   }
 
   &.center {
     text-align: center;
   }
+
   &.right {
     text-align: right;
   }
@@ -217,6 +240,23 @@ watch(gridConfig, async (newConfig) => {
 
     label {
       margin-right: 10px;
+    }
+  }
+}
+
+.magic-row {
+  &:hover {
+    .tools {
+      display: block;
+    }
+  }
+
+  .tools {
+    /* display: none; */
+    vertical-align: middle;
+
+    a {
+
     }
   }
 }
