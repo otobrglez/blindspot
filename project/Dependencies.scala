@@ -91,6 +91,10 @@ object Dependencies {
     "com.beachape" %% "enumeratum-circe"
   ).map(_ % "1.9.0")
 
+  lazy val openai: Modules = Seq(
+    "com.openai" % "openai-java" % "2.19.1"
+  )
+
   lazy val jsoup: Modules      = Seq("org.jsoup" % "jsoup" % Versions.jsoup)
   lazy val ical4j: Modules     = Seq(
     "org.mnode.ical4j" % "ical4j" % Versions.ical4j

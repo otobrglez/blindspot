@@ -22,7 +22,7 @@ lazy val root = project
     name         := "blindspot",
     scalaVersion := scala3Version,
     libraryDependencies ++= {
-      zio ++ json ++ db ++ jsoup ++ enumeratum
+      zio ++ json ++ db ++ jsoup ++ enumeratum ++ openai
       // zio ++ db ++ scheduler ++
       //  json ++ jwt ++ jsoup ++ ical4j ++ enumeratum ++ playwright
     },

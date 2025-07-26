@@ -28,6 +28,7 @@ export default defineConfig({
     validateSecrets: true
   },
 
+  // README: https://vite.dev/guide/assets
   vite: {
     css: {
       preprocessorOptions: {
