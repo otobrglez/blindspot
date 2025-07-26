@@ -24,16 +24,18 @@
     </turboFilter>
 
     <appender name="Sentry" class="io.sentry.logback.SentryAppender">
+        <!-- Optionally change minimum Event level. Default for Events is ERROR -->
         <minimumEventLevel>WARN</minimumEventLevel>
+        <!-- Optionally change minimum Breadcrumbs level. Default for Breadcrumbs is INFO -->
         <minimumBreadcrumbLevel>DEBUG</minimumBreadcrumbLevel>
     </appender>
 
-    <logger name="com.pinkstack.blindspot" level="INFO"/>
+    <logger name="si.ogrodje.goo" level="DEBUG"/>
     <logger name="io.netty" level="INFO"/>
     <logger name="org.quartz" level="WARN"/>
 
     <root level="${APP_LOG_LEVEL:-INFO}">
         <appender-ref ref="STDOUT"/>
-        <!-- <appender-ref ref="Sentry"/> -->
+        <appender-ref ref="Sentry"/>
     </root>
 </configuration>

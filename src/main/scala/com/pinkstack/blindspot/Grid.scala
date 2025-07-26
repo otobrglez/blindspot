@@ -68,8 +68,8 @@ object Grid:
         case (None, kind :: Nil, _, _)    =>
           fr" WHERE i.kind = ${kind.entryName.toUpperCase} "
 
-        case (Some(_), _, _, _)           => fr" WHERE title_vec @@ query"
-        case _                            =>
+        case (Some(_), _, _, _) => fr" WHERE title_vec @@ query"
+        case _                  =>
           fr" WHERE tomato_meter IS NOT NULL AND imdb_score IS NOT NULL AND imdb_votes IS NOT NULL "
 
       val ordering = (query, kind, countries, packages) match
@@ -109,3 +109,14 @@ object Grid:
     pageSize: Int = 20
   ): RIO[DB, List[Row]] =
     DB.transact(queries.showQuery(query, kind, countries, packages, page, pageSize).to[List])
+
+  def fromParams(
+    params: GridParams
+  ): RIO[DB, List[Row]] = showFor(
+    query = params.query,
+    kind = params.kind,
+    page = params.page,
+    pageSize = params.pageSize,
+    countries = params.countries,
+    packages = params.packages
+  )

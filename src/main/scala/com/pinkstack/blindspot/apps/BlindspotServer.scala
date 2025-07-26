@@ -1,6 +1,6 @@
 package com.pinkstack.blindspot.apps
 
-import com.pinkstack.blindspot.{Grid, Model}
+import com.pinkstack.blindspot.{Grid, GridParams, Model}
 import com.pinkstack.blindspot.ZIOOps.logExecution
 import com.pinkstack.blindspot.db.DB
 import io.circe.*
@@ -10,32 +10,37 @@ import zio.ZIO.{logError, logInfo}
 import zio.http.*
 import zio.http.Header.AccessControlAllowOrigin
 import zio.http.Middleware.{cors, CorsConfig}
+import zio.stream.ZStream
 
 object BlindspotServer:
-
-  private def optionalStringToList(op: Option[String]): List[String] =
-    op.fold(List.empty[String])(_.split("-").toList)
+  def myStream = ZStream
+    .from(List(1, 2, 3, 4, 5, 6, 7, 8, 9, 10))
+    .schedule(Schedule.spaced(2.seconds))
+    .map(i => s"Number is ${i}. ")
+    .map(s => ServerSentEvent(s))
 
   private val routes: Routes[DB, Nothing] = Routes(
-    Method.GET / "grid"      -> handler { (req: Request) =>
-      Grid
-        .showFor(
-          query = req.queryOrElse[Option[String]]("query", None).filter(_.nonEmpty),
-          kind = optionalStringToList(req.queryOrElse[Option[String]]("kind", None)).map(Model.ItemKind.withName),
-          page = req.queryOrElse[Option[Int]]("page", None).getOrElse(1),
-          pageSize = req.queryOrElse[Option[Int]]("pageSize", None).getOrElse(100)
-        )
+    Method.GET / "health"      -> handler(Response.ok),
+    Method.GET / "grid"        -> handler { (req: Request) =>
+      ZIO
+        .fromEither(GridParams.fromRequest(req))
+        .flatMap(Grid.fromParams)
         .map(rows => Response.json(rows.asJson.noSpaces))
     },
-    Method.GET / "countries" -> handler {
+    Method.GET / "test-stream" -> handler {
+      Response
+        .fromServerSentEvents(myStream)
+        .addHeader(Header.CacheControl.NoCache)
+    },
+    Method.GET / "countries"   -> handler {
       val countries = Model.supportedCountries.toList.sortBy(country => (-country.priority, country.name))
       Response.json(countries.asJson.noSpaces)
     },
-    Method.GET / "packages"  -> handler {
+    Method.GET / "packages"    -> handler {
       val packages = Model.supportedPackages.toList.sortBy(pkg => (-pkg.priority, pkg.name))
       Response.json(packages.asJson.noSpaces)
     },
-    Method.GET / "config"    -> handler {
+    Method.GET / "config"      -> handler {
       val config = Json.obj(
         "packages"  -> Model.supportedPackages.toList.sortBy(pkg => -pkg.priority -> pkg.name).asJson,
         "countries" -> Model.supportedCountries.toList.sortBy(country => -country.priority -> country.name).asJson,

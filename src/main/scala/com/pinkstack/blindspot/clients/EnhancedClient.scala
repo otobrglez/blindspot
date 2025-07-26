@@ -1,12 +1,8 @@
 package com.pinkstack.blindspot.clients
 
 import zio.Config.Secret
-import zio.ZLayer
+import zio.{System, ZLayer}
 import zio.http.*
-import zio.System
-import zio.http.ClientSSLConfig.{Default, FromTrustStoreFile}
-import zio.http.netty.NettyConfig
-import zio.http.netty.client.NettyClientDriver
 
 object EnhancedClient:
   private def liveClient: ZLayer[Any, Throwable, Client] =
