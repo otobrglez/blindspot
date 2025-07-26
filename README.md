@@ -23,18 +23,18 @@ The Blindspot service is deployed to **production** at [blindspot.pinkstack.com]
 just docker-build-all # will build all images
 just docker-push-all # will push all images
 
-just deploy-all # will build and deploy to production cluster
+just deploy-all # will build and deploy to the production cluster
 
 ```
 
 ## Architectular notes
 
-- Backend system is written in Scala 3, uses SBT as build system and ZIO framework.
-- Frontend is written in TypeScript and uses Vue.js with Astro Builds
-- Data collection is conducted via the `refresh-just-watch` application that collects data and feeds it into the database.
+- Backend - [`blindspot`](./src) - system is written in Scala 3, uses SBT as build system and ZIO framework.
+- Frontend - [`blindspot-ui`](./blindspot-ui) is written in TypeScript and uses Vue.js with Astro Builds
+- Data collection is conducted via the `refresh-just-watch` application that collects data and feeds it into the database. The collection system is designed in a way that can be rerun per hour/daily and runs in production via the Kubernetes [CronJob](https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/).
 - Blindspot uses PostgreSQL as a database.
 - The API server is written in ZIO HTTP
-- The application is running in production with the help of Kubernetes.
+- The application is running in production with the help of Kubernetes. The definitions can be found in [`k8s`](./k8s) folder.
 - There is preconfigured [docker-compose.yml](docker/docker-compose.yml) that will help with the local development.
 - Migrations are conducted via the Flyway library and are bundled into the API service and collector.
 
