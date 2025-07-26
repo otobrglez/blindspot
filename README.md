@@ -6,6 +6,8 @@ competitors host there, and projects the ROI of expanding or localising each sho
 static market data, and AI optimisation. Put simply: Blindspot turns guesswork into data‑backed expansion plans, so
 executives can green‑light their next billion‑viewer market before anyone else sees it.
 
+The Blindspot service is deployed to **production** at [blindspot.pinkstack.com](https://blindspot.pinkstack.com).
+
 > [!NOTE] 
 > This project was developed as part of the Disney Streaming Alliance Hackathon in July 2025 and is considered to be PoC - proof of concept.
 > The system does not use any of the IP or systems that belong to the organisation or affiliated brands.
