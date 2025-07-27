@@ -13,14 +13,13 @@ final class OpanAI private (
   private val client: OpenAIClient = null,
   private val asyncClient: OpenAIClientAsync = null
 ):
-  private type BuildWith = Builder => Builder
-
-  private def buildParams(buildWith: BuildWith) =
+  import OpanAI.*
+  private def buildParams(buildWith: BuildF) =
     ZIO.attempt(
       buildWith(ChatCompletionCreateParams.builder()).build()
     )
 
-  def completions(buildWith: BuildWith): ZStream[Any, Throwable, String] = for
+  def completions(buildWith: BuildF): ZStream[Any, Throwable, String] = for
     params <- ZStream.fromZIO(buildParams(buildWith))
     out    <-
       ZStream.fromJavaStream(
@@ -34,12 +33,16 @@ final class OpanAI private (
       )
   yield out
 
-  def completionsAsString(buildWith: BuildWith): Task[String] =
+  def completionsAsString(buildWith: BuildF): Task[String] =
     completions(buildWith).runCollect.map(_.mkString)
 
-  def completionStream(buildWith: BuildWith): ZStream[Any, Throwable, String] = for
-    params <- ZStream.fromZIO(buildParams(buildWith))
-    tokens <-
+  def completionStream(
+    buildWith: BuildF,
+    onComplete: String => ZIO[Any, Throwable, Unit] = _ => ZIO.unit
+  ): ZStream[Any, Throwable, String] = for
+    params           <- ZStream.fromZIO(buildParams(buildWith))
+    assistantResponse = new StringBuilder()
+    tokens           <-
       ZStream.async[Any, Throwable, String] { cb =>
         val future = asyncClient
           .chat()
@@ -49,7 +52,10 @@ final class OpanAI private (
             _.choices()
               .stream()
               .flatMap(_.delta().content().stream())
-              .forEach((content: String) => cb(ZIO.succeed(Chunk.single(content))))
+              .forEach { (content: String) =>
+                cb(ZIO.succeed(Chunk.single(content)))
+                assistantResponse.append(content)
+              }
           )
           .onCompleteFuture()
 
@@ -58,7 +64,7 @@ final class OpanAI private (
             .fromCompletableFuture(future)
             .foldCauseZIO(
               cause => ZIO.attempt(cb(ZIO.fail(Some(cause.squash)))),
-              _ => ZIO.attempt(cb(ZIO.fail(None)))
+              _ => ZIO.attempt(cb(ZIO.fail(None))).zipLeft(onComplete(assistantResponse.toString()))
             )
 
         Unsafe.unsafe(implicit unsafe => Runtime.default.unsafe.fork(completionEffect))
@@ -66,6 +72,8 @@ final class OpanAI private (
   yield tokens
 
 object OpanAI:
+  type BuildF = Builder => Builder
+
   trait Error(val message: String) extends Throwable:
     override def getMessage: String = message
 
@@ -75,6 +83,12 @@ object OpanAI:
     maybeOpenAPIKey <- System.env("OPENAI_API_KEY")
     openAPIKey      <- fromOption(maybeOpenAPIKey).orElseFail(ConfigurationError(s"Missing OPENAI_API_KEY"))
   yield openAPIKey
+
+  def completionStream(
+    buildWith: BuildF,
+    onComplete: String => ZIO[Any, Throwable, Unit] = _ => ZIO.unit
+  ): ZStream[OpanAI, Throwable, String] =
+    ZStream.serviceWithStream[OpanAI](_.completionStream(buildWith, onComplete))
 
   def liveWithClient: TaskLayer[OpanAI] = ZLayer.scoped:
     for

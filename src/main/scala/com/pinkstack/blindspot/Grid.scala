@@ -1,5 +1,6 @@
 package com.pinkstack.blindspot
 
+import com.pinkstack.blindspot.Grid.Row
 import com.pinkstack.blindspot.Model.{CountryCode, ItemKind, PackageSlug}
 import com.pinkstack.blindspot.db.DB
 import io.circe.Json
@@ -15,6 +16,7 @@ object Grid:
   final case class Row(
     id: String,
     title: String,
+    description: String,
     kind: Model.ItemKind,
     releaseYear: Int,
     imdbVotes: Option[Int],
@@ -52,7 +54,7 @@ object Grid:
         sql"""
              SELECT
               i.id,
-              i.title, i.kind, i.original_release_year, i.imdb_votes, i.imdb_score, i.tmdb_popularity,
+              i.title, i.short_description, i.kind, i.original_release_year, i.imdb_votes, i.imdb_score, i.tmdb_popularity,
               i.tmdb_score, i.tomato_meter, i.provider_tags,
               $rankFiled as rank
              FROM

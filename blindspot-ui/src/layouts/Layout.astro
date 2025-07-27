@@ -2,6 +2,7 @@
 import '@fontsource/barlow';
 import {Image} from 'astro:assets';
 import localBirdImage from '../assets/blindspotLogo.png';
+import dImage from '../assets/d.png'
 ---
 <!doctype html>
 <html lang="en">
@@ -16,7 +17,8 @@ import localBirdImage from '../assets/blindspotLogo.png';
 <div class="big-wrap">
   <header>
     <div class="logo">Blindspot
-      <Image src={localBirdImage} alt="Blindspot Logo"/>
+      <Image src={localBirdImage} alt="Blindspot Logo" class="blindspot"/>
+      <Image src={dImage} alt="Disney" class="dlogo"/>
     </div>
   </header>
   <slot/>
@@ -40,7 +42,7 @@ import localBirdImage from '../assets/blindspotLogo.png';
 
   label, select, option, input {
     font-size: 12pt;
-    // line-height: 1.5;
+    line-height: 1.5;
   }
 
   h1, h2, h3 {
@@ -51,9 +53,9 @@ import localBirdImage from '../assets/blindspotLogo.png';
   }
 
   .big-wrap {
-    max-width: 1750px;
+    max-width: 1650px;
     margin: 0 auto;
-    padding: 10px;
+    padding: 5px;
   }
 
   div.logo {
@@ -64,14 +66,21 @@ import localBirdImage from '../assets/blindspotLogo.png';
     line-height: 40px;
     font-size: 20pt;
     vertical-align: middle;
+    position: relative;
+    margin-bottom: 15px;
 
     img {
       // background-color: red;
       // margin: 2px;
       display: inline-block;
-      height: 50%;
+      height: 90%;
       width: fit-content;
       vertical-align: middle;
+
+      &.dlogo {
+        position: absolute;
+        right: 0;
+      }
     }
   }
 </style>

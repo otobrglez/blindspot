@@ -34,18 +34,21 @@ object OpenAISpec extends ZIOSpecDefault:
     }.when(enabled),
     test("async responses") {
       val program = for
-        openAI <- ZIO.service[OpanAI]
-        _      <-
+        openAI       <- ZIO.service[OpanAI]
+        finalMessage <- Promise.make[Throwable, String]
+        _            <-
           openAI
             .completionStream(
               _.model(ChatModel.GPT_3_5_TURBO)
                 .maxCompletionTokens(1048)
                 .addSystemMessage(Prompts.systemPrompt)
                 .addDeveloperMessage(devPrompt)
-                .addUserMessage(userPrompt)
+                .addUserMessage(userPrompt),
+              onComplete = m => finalMessage.succeed(m).unit
             )
             .runForeach(p => zio.Console.print(p))
-      yield assertCompletes
+        message      <- finalMessage.await
+      yield assertTrue(!(message.isEmpty))
       program.provide(openAIConfig >>> OpanAI.liveWithAsyncClient)
     }
   )

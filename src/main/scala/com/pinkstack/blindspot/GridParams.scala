@@ -3,6 +3,8 @@ package com.pinkstack.blindspot
 import com.pinkstack.blindspot.Model.{CountryCode, PackageSlug}
 import zio.http.Request
 
+private val defaultPageSize = 20
+
 final case class GridParams(
   itemIDs: List[String] = List.empty,
   countries: List[CountryCode] = List.empty,
@@ -10,7 +12,7 @@ final case class GridParams(
   query: Option[String] = None,
   kind: List[Model.ItemKind] = List.empty,
   page: Int = 1,
-  pageSize: Int = 100
+  pageSize: Int = defaultPageSize
 )
 
 object GridParams:
@@ -24,5 +26,5 @@ object GridParams:
     countries = optionalStringToList(request.queryOrElse[Option[String]]("countries", None))
     packages  = optionalStringToList(request.queryOrElse[Option[String]]("packages", None))
     page      = request.queryOrElse[Option[Int]]("page", None).getOrElse(1)
-    pageSize  = request.queryOrElse[Option[Int]]("pageSize", None).getOrElse(100)
+    pageSize  = request.queryOrElse[Option[Int]]("pageSize", None).getOrElse(defaultPageSize)
   yield GridParams(itemIDs, countries, packages, query, kind, page, pageSize)

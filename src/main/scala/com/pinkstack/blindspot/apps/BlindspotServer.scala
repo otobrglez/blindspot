@@ -1,6 +1,6 @@
 package com.pinkstack.blindspot.apps
 
-import com.pinkstack.blindspot.{Grid, GridParams, Model}
+import com.pinkstack.blindspot.{Assistant, AssistantMemory, Grid, GridParams, Model}
 import com.pinkstack.blindspot.ZIOOps.logExecution
 import com.pinkstack.blindspot.db.DB
 import io.circe.*
@@ -11,6 +11,7 @@ import zio.http.*
 import zio.http.Header.AccessControlAllowOrigin
 import zio.http.Middleware.{cors, CorsConfig}
 import zio.stream.ZStream
+import com.pinkstack.blindspot.clients.OpanAI
 
 object BlindspotServer:
   def myStream = ZStream
@@ -19,7 +20,21 @@ object BlindspotServer:
     .map(i => s"Number is ${i}. ")
     .map(s => ServerSentEvent(s))
 
-  private val routes: Routes[DB, Nothing] = Routes(
+  Route
+
+  private val assistantRoutes: Routes[DB & AssistantMemory & OpanAI, Nothing] = Routes(
+    Method.GET / "assistant" -> handler { (request: Request) =>
+      for
+        openAI <- ZIO.service[OpanAI]
+        memory <- ZIO.service[AssistantMemory]
+        grid   <- ZIO.fromEither(GridParams.fromRequest(request)).flatMap(Grid.fromParams).orDie
+      yield Response
+        .fromServerSentEvents(Assistant.sseStreamFromRequest(openAI, memory, grid, request))
+        .addHeader(Header.CacheControl.NoCache)
+    }
+  )
+
+  private val routes: Routes[DB & OpanAI, Nothing] = Routes(
     Method.GET / "health"      -> handler(Response.ok),
     Method.GET / "grid"        -> handler { (req: Request) =>
       ZIO
@@ -59,14 +74,17 @@ object BlindspotServer:
     allowedMethods = Header.AccessControlAllowMethods.All
   )
 
-  def run = for
-    // scope  <- ZIO.service[Scope]
-    _   <- ZIO.unit
-    port = 7779
-    _   <- DB.migrate.logExecution("Migration")
-    _   <- logInfo(s"Booting server on port ${port}")
-    _   <- Server
-             .serve(routes = routes @@ cors(corsConfig) @@ Middleware.debug)
-             .provide(Server.defaultWithPort(port), DB.transactorLayer)
-    _   <- ZIO.never
-  yield ()
+  def run = {
+    for
+      // scope  <- ZIO.service[Scope]
+      _   <- ZIO.unit
+      port = 7779
+      _   <- DB.migrate.logExecution("Migration")
+      _   <- logInfo(s"Booting server on port ${port}")
+      _   <-
+        Server
+          .serve(routes = (routes ++ assistantRoutes) @@ cors(corsConfig) @@ Middleware.debug)
+          .provide(Server.defaultWithPort(port), DB.transactorLayer, OpanAI.liveWithAsyncClient, AssistantMemory.live)
+      _   <- ZIO.never
+    yield ()
+  }.tapError(th => zio.Console.printLine(s"🔥 Crashed: ${th.getMessage} @ ${th.printStackTrace()}"))
