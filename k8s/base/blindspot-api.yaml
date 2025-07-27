@@ -41,6 +41,8 @@ spec:
               valueFrom: { secretKeyRef: { name: blindspot-secret, key: postgres_user } }
             - name: POSTGRES_DB
               valueFrom: { secretKeyRef: { name: blindspot-secret, key: postgres_db } }
+            - name: OPENAI_API_KEY
+              valueFrom: { secretKeyRef: { name: blindspot-secret, key: openai_api_key } }
           livenessProbe:
             httpGet:
               path: /grid

@@ -29,8 +29,7 @@ object Message:
 
 final case class Assistant() {}
 object Assistant:
-
-  private val toOpenAIHistory: List[Message] => List[ChatCompletionMessageParam] = _.map:
+  private val toOpenAIHistory: List[Message] => List[ChatCompletionMessageParam] = _.map {
     case Message(_, message, ChatMessageRole.System)                            =>
       ChatCompletionMessageParam.ofSystem(ChatCompletionSystemMessageParam.builder().content(message).build())
     case com.pinkstack.blindspot.Message(_, message, ChatMessageRole.Assistant) =>
@@ -39,6 +38,7 @@ object Assistant:
       ChatCompletionMessageParam.ofUser(ChatCompletionUserMessageParam.builder().content(message).build())
     case com.pinkstack.blindspot.Message(_, message, ChatMessageRole.Developer) =>
       ChatCompletionMessageParam.ofDeveloper(ChatCompletionDeveloperMessageParam.builder().content(message).build())
+  }
 
   private def gridToPrompt(grid: List[Row]): String =
     "You know about movies and availability (in countries and streaming providers): " ++ grid

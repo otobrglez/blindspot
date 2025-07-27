@@ -3,9 +3,9 @@ host := `uname -a`
 service_version := `cat VERSION`
 
 refresh-version:
-   echo "version := \"{{service_version}}\"" > version.sbt & \
+   echo "version := \"{{service_version}}\"" > version.sbt && \
     yq e '.images[] |= select(.name == "registry.ogrodje.si/otobrglez/blindspot-ui") .newTag = "'{{service_version}}'"' \
-      -i k8s/base/kustomization.yaml & \
+      -i k8s/base/kustomization.yaml && \
           yq e '.images[] |= select(.name == "registry.ogrodje.si/otobrglez/blindspot") .newTag = "'{{service_version}}'"' \
             -i k8s/base/kustomization.yaml
 

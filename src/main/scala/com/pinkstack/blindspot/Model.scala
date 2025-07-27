@@ -53,7 +53,7 @@ object Model:
     Package("HULU", "hulu", 0.8),
     Package("Google Play Movies", "google-play-movies", 0.0),
     Package("HBO Max", "hbo-max", 0.0),
-    Package("MUBI", "mubi", 0.0),
+    // Package("MUBI", "mubi", 0.0),
     Package("Netflix", "netflix", 0.8),
     Package("Paramount Pictures", "paramount-pictures", 0.5),
     Package("Paramount+", "paramount-plus", 0.0)
@@ -66,7 +66,7 @@ object Model:
     Platform("HULU", Set("hulu"), 0.8),
     Platform("Google Play Movies", Set("google-play-movies"), 0.0),
     Platform("HBO Max", Set("hbo-max"), 0.0),
-    Platform("MUBI", Set("mubi"), 0.0),
+    // Platform("MUBI", Set("mubi"), 0.0),
     Platform("Netflix", Set("netflix"), 0.8),
     Platform("Paramount Pictures", Set("paramount-pictures", "paramount-plus"), 0.5)
   )

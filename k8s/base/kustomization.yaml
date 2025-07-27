@@ -4,6 +4,6 @@ resources:
   - blindspot-api.yaml
 images:
   - name: registry.ogrodje.si/otobrglez/blindspot
-    newTag: '0.0.14'
+    newTag: '0.0.15'
   - name: registry.ogrodje.si/otobrglez/blindspot-ui
-    newTag: '0.0.13'
+    newTag: '0.0.15'

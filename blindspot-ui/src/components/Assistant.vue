@@ -215,6 +215,8 @@ function scrollToBottom() {
         border-radius: 5px;
         background-color: #FFF;
 
+        font-size: 13pt;
+
         &.fromUser {
           align-self: flex-end;
           background-color: #E0E0E0;

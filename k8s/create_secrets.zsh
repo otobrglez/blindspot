@@ -13,7 +13,8 @@ kubectl create secret generic --namespace=$NS \
   --from-literal=postgres_db=$POSTGRES_PROD_DB \
   --from-literal=http_proxy=$PROD_HTTP_PROXY \
   --from-literal=http_proxy_pass=$PROD_HTTP_PROXY_PASS \
-  --from-literal=http_proxy_user=$PROD_HTTP_PROXY_USER
+  --from-literal=http_proxy_user=$PROD_HTTP_PROXY_USER \
+  --from-literal=openai_api_key=$OPENAI_API_KEY
 
 kubectl delete secret ssh-private-key --namespace=$NS --ignore-not-found
 
