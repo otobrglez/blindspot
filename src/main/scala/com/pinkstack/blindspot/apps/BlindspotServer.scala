@@ -11,7 +11,7 @@ import zio.http.*
 import zio.http.Header.AccessControlAllowOrigin
 import zio.http.Middleware.{cors, CorsConfig}
 import zio.stream.ZStream
-import com.pinkstack.blindspot.clients.OpanAI
+import com.pinkstack.blindspot.clients.OpenAI
 
 object BlindspotServer:
   def myStream = ZStream
@@ -22,10 +22,10 @@ object BlindspotServer:
 
   Route
 
-  private val assistantRoutes: Routes[DB & AssistantMemory & OpanAI, Nothing] = Routes(
+  private val assistantRoutes: Routes[DB & AssistantMemory & OpenAI, Nothing] = Routes(
     Method.GET / "assistant" -> handler { (request: Request) =>
       for
-        openAI <- ZIO.service[OpanAI]
+        openAI <- ZIO.service[OpenAI]
         memory <- ZIO.service[AssistantMemory]
         grid   <- ZIO.fromEither(GridParams.fromRequest(request)).flatMap(Grid.fromParams).orDie
       yield Response
@@ -34,7 +34,7 @@ object BlindspotServer:
     }
   )
 
-  private val routes: Routes[DB & OpanAI, Nothing] = Routes(
+  private val routes: Routes[DB & OpenAI, Nothing] = Routes(
     Method.GET / "health"      -> handler(Response.ok),
     Method.GET / "grid"        -> handler { (req: Request) =>
       ZIO
@@ -84,7 +84,7 @@ object BlindspotServer:
       _   <-
         Server
           .serve(routes = (routes ++ assistantRoutes) @@ cors(corsConfig) @@ Middleware.debug)
-          .provide(Server.defaultWithPort(port), DB.transactorLayer, OpanAI.liveWithAsyncClient, AssistantMemory.live)
+          .provide(Server.defaultWithPort(port), DB.transactorLayer, OpenAI.liveWithAsyncClient, AssistantMemory.live)
       _   <- ZIO.never
     yield ()
   }.tapError(th => zio.Console.printLine(s"🔥 Crashed: ${th.getMessage} @ ${th.printStackTrace()}"))

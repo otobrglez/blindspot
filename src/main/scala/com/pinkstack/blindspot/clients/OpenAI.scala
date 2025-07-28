@@ -8,12 +8,12 @@ import zio.*
 import zio.ZIO.fromOption
 import zio.stream.ZStream
 
-final class OpanAI private (
+final class OpenAI private(
   // Clients have nothing in common; so this trick is used.
   private val client: OpenAIClient = null,
   private val asyncClient: OpenAIClientAsync = null
 ):
-  import OpanAI.*
+  import OpenAI.*
   private def buildParams(buildWith: BuildF) =
     ZIO.attempt(
       buildWith(ChatCompletionCreateParams.builder()).build()
@@ -71,7 +71,7 @@ final class OpanAI private (
       }
   yield tokens
 
-object OpanAI:
+object OpenAI:
   type BuildF = Builder => Builder
 
   trait Error(val message: String) extends Throwable:
@@ -87,17 +87,17 @@ object OpanAI:
   def completionStream(
     buildWith: BuildF,
     onComplete: String => ZIO[Any, Throwable, Unit] = _ => ZIO.unit
-  ): ZStream[OpanAI, Throwable, String] =
-    ZStream.serviceWithStream[OpanAI](_.completionStream(buildWith, onComplete))
+  ): ZStream[OpenAI, Throwable, String] =
+    ZStream.serviceWithStream[OpenAI](_.completionStream(buildWith, onComplete))
 
-  def liveWithClient: TaskLayer[OpanAI] = ZLayer.scoped:
+  def liveWithClient: TaskLayer[OpenAI] = ZLayer.scoped:
     for
       openAPIKey <- readOpenAIAPIKey
       client      = OpenAIOkHttpClient.builder().apiKey(openAPIKey).build()
-    yield new OpanAI(client, asyncClient = null)
+    yield new OpenAI(client, asyncClient = null)
 
-  def liveWithAsyncClient: TaskLayer[OpanAI] = ZLayer.scoped:
+  def liveWithAsyncClient: TaskLayer[OpenAI] = ZLayer.scoped:
     for
       openAPIKey <- readOpenAIAPIKey
       client      = OpenAIOkHttpClientAsync.builder().apiKey(openAPIKey).build()
-    yield new OpanAI(client = null, asyncClient = client)
+    yield new OpenAI(client = null, asyncClient = client)

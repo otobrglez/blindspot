@@ -5,8 +5,8 @@ import com.openai.models.chat.completions.ChatCompletionCreateParams.Builder
 import com.openai.models.chat.completions.*
 import com.pinkstack.blindspot.Grid.Row
 import com.pinkstack.blindspot.Model.ItemKind.{Movie, Show}
-import com.pinkstack.blindspot.clients.OpanAI
-import com.pinkstack.blindspot.clients.OpanAI.BuildF
+import com.pinkstack.blindspot.clients.OpenAI
+import com.pinkstack.blindspot.clients.OpenAI.BuildF
 import zio.*
 import zio.ZIO.logInfo
 import zio.http.{Request, ServerSentEvent}
@@ -126,10 +126,10 @@ object Assistant:
       }
 
   def sseStreamFromRequest(
-    openAI: OpanAI,
-    memory: AssistantMemory,
-    grid: List[Row],
-    request: Request
+                            openAI: OpenAI,
+                            memory: AssistantMemory,
+                            grid: List[Row],
+                            request: Request
   ): ZStream[Any, Nothing, ServerSentEvent[String]] = for
     _        <- ZStream.unit
     userInput = request.queryOrElse[Option[String]]("input", None)
@@ -144,7 +144,7 @@ object Assistant:
     _                     = memory.appendMessages(sessionID, messages)
 
     token <-
-      OpanAI
+      OpenAI
         .completionStream(
           buildWith = buildWith,
           onComplete =

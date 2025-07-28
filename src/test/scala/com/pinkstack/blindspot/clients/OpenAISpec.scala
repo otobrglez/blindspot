@@ -18,7 +18,7 @@ object OpenAISpec extends ZIOSpecDefault:
   def spec = suite("OpenAI")(
     test("non-streaming response") {
       val program = for
-        openAI <- ZIO.service[OpanAI]
+        openAI <- ZIO.service[OpenAI]
         _      <-
           openAI
             .completions(
@@ -30,11 +30,11 @@ object OpenAISpec extends ZIOSpecDefault:
             )
             .runForeach(p => zio.Console.printLine(p))
       yield assertCompletes
-      program.provide(openAIConfig >>> OpanAI.liveWithClient)
+      program.provide(openAIConfig >>> OpenAI.liveWithClient)
     }.when(enabled),
     test("async responses") {
       val program = for
-        openAI       <- ZIO.service[OpanAI]
+        openAI       <- ZIO.service[OpenAI]
         finalMessage <- Promise.make[Throwable, String]
         _            <-
           openAI
@@ -49,6 +49,6 @@ object OpenAISpec extends ZIOSpecDefault:
             .runForeach(p => zio.Console.print(p))
         message      <- finalMessage.await
       yield assertTrue(!(message.isEmpty))
-      program.provide(openAIConfig >>> OpanAI.liveWithAsyncClient)
+      program.provide(openAIConfig >>> OpenAI.liveWithAsyncClient)
     }
   )
