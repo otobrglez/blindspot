@@ -1,0 +1,79 @@
+---
+import '@fontsource/barlow';
+import {Image} from 'astro:assets';
+import localBirdImage from '../assets/blindspotLogo.png';
+import dImage from '../assets/d.png'
+---
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
+  <meta name="generator" content={Astro.generator}/>
+  <title>Blindspot</title>
+</head>
+<body>
+<div class="big-wrap">
+  <slot/>
+</div>
+</body>
+</html>
+<style lang="scss" is:global>
+  html,
+  body {
+    margin: 0;
+  }
+
+  body {
+    font-family: sans-serif;
+    font-weight: 400;
+    font-size: 12pt;
+    line-height: 1.2;
+    padding: 5px
+  }
+
+  label, select, option, input {
+    font-size: 12pt;
+    line-height: 1.5;
+  }
+
+  h1, h2, h3 {
+    font-family: 'Barlow', sans-serif;
+    font-weight: 700;
+    margin: 0;
+    margin-bottom: 5px;
+  }
+
+  .big-wrap {
+    max-width: 1650px;
+    margin: 0 auto;
+    padding: 5px;
+  }
+
+  div.logo {
+    font-weight: 700;
+    font-family: 'Barlow', sans-serif;
+    display: block;
+    height: 40px;
+    line-height: 40px;
+    font-size: 20pt;
+    vertical-align: middle;
+    position: relative;
+    margin-bottom: 15px;
+
+    img {
+      // background-color: red;
+      // margin: 2px;
+      display: inline-block;
+      height: 90%;
+      width: fit-content;
+      vertical-align: middle;
+
+      &.dlogo {
+        position: absolute;
+        right: 0;
+      }
+    }
+  }
+</style>
